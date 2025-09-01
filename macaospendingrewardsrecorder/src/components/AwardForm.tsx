@@ -308,7 +308,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                 <select
                   value={formData.value}
                   onChange={(e) => handleValueChange(index, parseInt(e.target.value) as AwardValue)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
                   required
                 >
                   <option value={0}>謝謝惠顧</option>
@@ -327,7 +327,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                 <select
                   value={formData.bank}
                   onChange={(e) => handleFormChange(index, 'bank', e.target.value as Bank)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
                   required
                 >
                   {BANKS.map(bank => (
@@ -344,7 +344,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                   type="date"
                   value={formData.drawDate}
                   onChange={(e) => handleDrawDateChange(index, e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 ${
                     drawDateErrors[index] ? 'border-red-500' : 'border-gray-300'
                   }`}
                   required
@@ -362,7 +362,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                   type="date"
                   value={formData.expiryDate}
                   readOnly
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 cursor-not-allowed"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 cursor-not-allowed text-gray-800"
                   title="到期日期根據抽獎日期自動計算"
                 />
                 <p className="text-gray-500 text-xs mt-1">根據抽獎日期自動計算</p>
@@ -391,7 +391,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                       }, 200);
                     }}
                     placeholder="可選"
-                    className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
                   />
                   {merchantSuggestions.length > 0 && (
                     <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
@@ -435,7 +435,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                   value={formData.notes}
                   onChange={(e) => handleFormChange(index, 'notes', e.target.value)}
                   placeholder="可選"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
                 />
               </div>
             </div>
@@ -462,7 +462,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                   type="date"
                   value={formData.redeemedDate}
                   onChange={(e) => handleFormChange(index, 'redeemedDate', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
                   required={formData.redeemed}
                 />
               </div>

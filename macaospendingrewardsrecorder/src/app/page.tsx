@@ -250,7 +250,7 @@ export default function Home() {
                 type="file"
                 accept=".json"
                 onChange={handleImportData}
-                className="hidden"
+                className="hidden text-gray-800"
               />
             </label>
           </div>

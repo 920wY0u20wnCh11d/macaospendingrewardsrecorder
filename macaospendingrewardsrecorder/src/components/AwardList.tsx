@@ -210,7 +210,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
                 placeholder="搜索商戶、銀行、備註或面值..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="px-3 py-1 pr-8 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-1 pr-8 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
               />
               {searchTerm && (
                 <button
@@ -226,7 +226,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value as typeof filter)}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
             >
               <option value="all">全部</option>
               <option value="pending">待兌換</option>
@@ -237,7 +237,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
             >
               <option value="date">按日期排序</option>
               <option value="value">按面值排序</option>
@@ -339,7 +339,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
                                   setSelectedSuggestionIndex(-1);
                                 }, 200);
                               }}
-                              className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                              className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-gray-800"
                               placeholder="輸入商戶名稱"
                               autoFocus
                             />
