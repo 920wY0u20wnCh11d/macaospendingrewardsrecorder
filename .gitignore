@@ -1,24 +1,7 @@
-# Nestjs specific
-/dist
-/node_modules
-/build
-/tmp
+# Next.js project is in macaospendingrewardsrecorder/ subdirectory
+# See macaospendingrewardsrecorder/.gitignore for project-specific ignores
 
-# Logs
-logs
+# Root level ignores
+.DS_Store
 *.log
-npm-debug.log*
-pnpm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-
-# dotenv environment variable files
-.env
-.env.development
-.env.test
-.env.production
-
-# temp directory
-.temp
-.tmp
+.env*

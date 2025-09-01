@@ -27,7 +27,12 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: macaospendingrewardsrecorder/package-lock.json
+          cache-dependency-path: macaospendingrewardsrecorder/package.json
+
+      - name: Verify Node.js and npm versions
+        run: |
+          node --version
+          npm --version
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -35,15 +40,52 @@ jobs:
       - name: Install dependencies
         run: |
           cd macaospendingrewardsrecorder
+          echo "Installing dependencies..."
           npm ci
+          echo "✅ Dependencies installed successfully"
+
+      - name: Clean previous build (if exists)
+        run: |
+          cd macaospendingrewardsrecorder
+          if [ -d "out" ]; then
+            echo "Cleaning previous build..."
+            rm -rf out
+          fi
 
       - name: Build with Next.js
         run: |
           cd macaospendingrewardsrecorder
-          npm run export
+          echo "Starting Next.js build..."
+          npm run build
+          echo "Build completed successfully"
+        env:
+          NODE_ENV: production
+          NEXT_TELEMETRY_DISABLED: 1
 
-      - name: Add .nojekyll file
-        run: touch macaospendingrewardsrecorder/out/.nojekyll
+      - name: Verify build output
+        run: |
+          cd macaospendingrewardsrecorder
+          echo "Verifying build output..."
+          ls -la out/
+          if [ ! -d "out" ]; then
+            echo "❌ Build failed: out directory not found"
+            exit 1
+          fi
+          if [ ! -f "out/index.html" ]; then
+            echo "❌ Build failed: index.html not found in out directory"
+            exit 1
+          fi
+          echo "✅ Build verification successful"
+          echo "Build output size:"
+          du -sh out/
+
+      - name: Add build metadata
+        run: |
+          cd macaospendingrewardsrecorder
+          echo "Adding build metadata..."
+          echo "Built on $(date)" > out/build-info.txt
+          echo "Commit: $GITHUB_SHA" >> out/build-info.txt
+          echo "✅ Build metadata added"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -58,6 +100,14 @@ jobs:
     needs: build
 
     steps:
+      - name: Check deployment readiness
+        run: |
+          echo "Checking deployment readiness..."
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Ref: $GITHUB_REF"
+          echo "SHA: $GITHUB_SHA"
+          echo "✅ Deployment checks passed"
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
