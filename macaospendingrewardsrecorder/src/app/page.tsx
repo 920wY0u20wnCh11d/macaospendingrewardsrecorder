@@ -1,102 +1,147 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Award } from '@/types/award';
+import { storageUtils } from '@/utils/storage';
+import { isAwardExpired } from '@/utils/dateUtils';
+import AwardForm from '@/components/AwardForm';
+import AwardList from '@/components/AwardList';
+import Summary from '@/components/Summary';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [awards, setAwards] = useState<Award[]>([]);
+  const [editingAward, setEditingAward] = useState<Award | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // Load awards from localStorage on component mount
+  useEffect(() => {
+    const loadedAwards = storageUtils.getAwards();
+    // Update expired awards status
+    const updatedAwards = loadedAwards.map(award => {
+      if (isAwardExpired(award.expiryDate) && award.status !== 'expired') {
+        return { ...award, status: 'expired' as const };
+      }
+      return award;
+    });
+    
+    // Save updated awards if any status changed
+    if (updatedAwards.some((award, index) => award.status !== loadedAwards[index]?.status)) {
+      storageUtils.saveAwards(updatedAwards);
+    }
+    
+    setAwards(updatedAwards);
+    setIsLoading(false);
+  }, []);
+
+  const handleAddOrUpdateAward = (award: Award) => {
+    if (editingAward) {
+      // Update existing award
+      storageUtils.updateAward(award);
+      setAwards(prev => prev.map(a => a.id === award.id ? award : a));
+      setEditingAward(null);
+    } else {
+      // Add new award
+      storageUtils.addAward(award);
+      setAwards(prev => [...prev, award]);
+    }
+  };
+
+  const handleEditAward = (award: Award) => {
+    setEditingAward(award);
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDeleteAward = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this award?')) {
+      storageUtils.deleteAward(id);
+      setAwards(prev => prev.filter(a => a.id !== id));
+    }
+  };
+
+  const handleStatusChange = (id: string, status: Award['status']) => {
+    const award = awards.find(a => a.id === id);
+    if (award) {
+      const updatedAward = { ...award, status, updatedAt: new Date().toISOString() };
+      storageUtils.updateAward(updatedAward);
+      setAwards(prev => prev.map(a => a.id === id ? updatedAward : a));
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingAward(null);
+  };
+
+  const handleClearAllData = () => {
+    if (window.confirm('Are you sure you want to delete ALL awards? This action cannot be undone.')) {
+      storageUtils.clearAllAwards();
+      setAwards([]);
+      setEditingAward(null);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading awards...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Macao Lucky Draw Recorder</h1>
+              <p className="text-gray-600 mt-1">Manage and track your lucky draw awards</p>
+            </div>
+            {awards.length > 0 && (
+              <button
+                onClick={handleClearAllData}
+                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+              >
+                Clear All Data
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-8">
+          {/* Summary */}
+          <Summary awards={awards} />
+          
+          {/* Award Form */}
+          <AwardForm
+            onSubmit={handleAddOrUpdateAward}
+            editingAward={editingAward}
+            onCancel={handleCancelEdit}
+          />
+          
+          {/* Awards List */}
+          <AwardList
+            awards={awards}
+            onEdit={handleEditAward}
+            onDelete={handleDeleteAward}
+            onStatusChange={handleStatusChange}
+          />
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      {/* Footer */}
+      <footer className="bg-white border-t mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="text-center text-gray-500 text-sm">
+            <p>© 2024 Macao Lucky Draw Recorder. All data is stored locally in your browser.</p>
+          </div>
+        </div>
       </footer>
     </div>
   );
