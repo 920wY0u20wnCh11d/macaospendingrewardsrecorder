@@ -83,6 +83,63 @@ export const getAwardSummary = () => {
     return acc;
   }, {} as Record<string, number>);
 
+  // Bank-specific value distributions and big award analysis
+  const bankValueDistribution = awards.reduce((acc, award) => {
+    if (!acc[award.bank]) {
+      acc[award.bank] = {
+        totalAwards: 0,
+        valueBreakdown: {} as Record<number, number>,
+        bigAwards: 0, // awards >= 100 MOP
+        totalValue: 0,
+        bigAwardValue: 0,
+        probability: 0
+      };
+    }
+    acc[award.bank].totalAwards += 1;
+    acc[award.bank].valueBreakdown[award.value] = (acc[award.bank].valueBreakdown[award.value] || 0) + 1;
+    acc[award.bank].totalValue += award.value;
+
+    if (award.value >= 100) {
+      acc[award.bank].bigAwards += 1;
+      acc[award.bank].bigAwardValue += award.value;
+    }
+
+    return acc;
+  }, {} as Record<string, {
+    totalAwards: number;
+    valueBreakdown: Record<number, number>;
+    bigAwards: number;
+    totalValue: number;
+    bigAwardValue: number;
+    probability: number;
+  }>);
+
+  // Calculate probability for each bank
+  Object.keys(bankValueDistribution).forEach(bank => {
+    const bankData = bankValueDistribution[bank];
+    bankData.probability = bankData.totalAwards > 0 ? (bankData.bigAwards / bankData.totalAwards) * 100 : 0;
+  });
+
+  // Get top 3 banks for big awards (by probability, then by total big awards)
+  const topBigAwardBanks = Object.entries(bankValueDistribution)
+    .filter(([_, data]) => data.totalAwards > 0)
+    .sort((a, b) => {
+      // First sort by probability
+      if (b[1].probability !== a[1].probability) {
+        return b[1].probability - a[1].probability;
+      }
+      // Then by total big awards
+      return b[1].bigAwards - a[1].bigAwards;
+    })
+    .slice(0, 3)
+    .map(([bank, data]) => ({
+      bank,
+      probability: Math.round(data.probability * 100) / 100,
+      bigAwards: data.bigAwards,
+      totalAwards: data.totalAwards,
+      bigAwardValue: data.bigAwardValue
+    }));
+
   // Check for expired awards
   const now = new Date();
   const expiredAwards = awards.filter(award =>
@@ -98,6 +155,8 @@ export const getAwardSummary = () => {
     pendingValue,
     valueDistribution,
     bankDistribution,
+    bankValueDistribution,
+    topBigAwardBanks,
     expiredAwards,
   };
 };
