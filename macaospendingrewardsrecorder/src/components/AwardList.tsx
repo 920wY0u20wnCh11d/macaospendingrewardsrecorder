@@ -204,18 +204,18 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative">
+            <div className="relative flex-1">
               <input
                 type="text"
                 placeholder="搜索商戶、銀行、備註或面值..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="px-3 py-1 pr-8 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 min-h-[44px]"
               />
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm('')}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm min-h-[44px] min-w-[44px] flex items-center justify-center"
                   title="清除搜索"
                 >
                   ✕
@@ -226,7 +226,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value as typeof filter)}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 min-h-[44px]"
             >
               <option value="all">全部</option>
               <option value="pending">待兌換</option>
@@ -237,7 +237,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 min-h-[44px]"
             >
               <option value="date">按日期排序</option>
               <option value="value">按面值排序</option>
@@ -249,7 +249,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
 
             <button
               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px] min-w-[44px] flex items-center justify-center"
               title={`切換排序順序 (${sortOrder === 'asc' ? '升序' : '降序'})`}
             >
               {sortOrder === 'asc' ? '↑' : '↓'}
@@ -264,62 +264,222 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
             {filter === 'all' ? '還沒有記錄任何獎品' : '沒有符合條件的獎品'}
           </div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  面值
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  承辦單位
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  抽獎日期
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  到期日期
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  商戶
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  狀態
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  操作
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      面值
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      承辦單位
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      抽獎日期
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      到期日期
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      商戶
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      狀態
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      操作
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredAndSortedAwards.map((award) => (
+                    <tr key={award.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          {award.isThankYou ? (
+                            <span className="text-orange-600 font-semibold">謝謝惠顧</span>
+                          ) : (
+                            `${award.value} MOP`
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 max-w-xs truncate" title={award.bank}>
+                          {award.bank}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {formatDate(award.drawDate)}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className={`text-sm ${isExpired(award) ? 'text-red-600 font-medium' : 'text-gray-900'}`}>
+                          {formatDate(award.expiryDate)}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        {editingMerchant === award.id ? (
+                          <div className="relative">
+                            <div className="flex items-center space-x-2">
+                              <div className="relative flex-1">
+                                <input
+                                  type="text"
+                                  value={merchantValue}
+                                  onChange={(e) => handleMerchantValueChange(e.target.value)}
+                                  onKeyDown={handleMerchantKeyDown}
+                                  onFocus={() => {
+                                    if (merchantValue && merchantSuggestions.length > 0) {
+                                      setShowMerchantSuggestions(true);
+                                    }
+                                  }}
+                                  onBlur={() => {
+                                    // Delay hiding suggestions to allow click on suggestion
+                                    setTimeout(() => {
+                                      setShowMerchantSuggestions(false);
+                                      setSelectedSuggestionIndex(-1);
+                                    }, 200);
+                                  }}
+                                  className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-gray-800"
+                                  placeholder="輸入商戶名稱"
+                                  autoFocus
+                                />
+                                {merchantSuggestions.length > 0 && (
+                                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                                    💡
+                                  </div>
+                                )}
+                                
+                                {/* Merchant Suggestions Dropdown */}
+                                {showMerchantSuggestions && (
+                                  <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-32 overflow-y-auto">
+                                    {getFilteredMerchantSuggestions(merchantValue).length > 0 ? (
+                                      getFilteredMerchantSuggestions(merchantValue).map((suggestion, index) => (
+                                        <div
+                                          key={index}
+                                          onClick={() => handleMerchantSuggestionSelect(suggestion)}
+                                          className={`px-3 py-2 cursor-pointer text-sm border-b border-gray-100 last:border-b-0 ${
+                                            index === selectedSuggestionIndex
+                                              ? 'bg-blue-100 text-blue-900'
+                                              : 'hover:bg-gray-100'
+                                          }`}
+                                        >
+                                          {suggestion}
+                                        </div>
+                                      ))
+                                    ) : merchantValue && (
+                                      <div className="px-3 py-2 text-sm text-gray-500">
+                                        無匹配的商戶建議
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => handleSaveMerchant(award.id)}
+                                className="text-green-600 hover:text-green-800 text-sm"
+                                title="保存"
+                              >
+                                ✓
+                              </button>
+                              <button
+                                onClick={handleCancelMerchantEdit}
+                                className="text-red-600 hover:text-red-800 text-sm"
+                                title="取消"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-900">
+                              {award.merchant || '-'}
+                            </span>
+                            <button
+                              onClick={() => handleEditMerchant(award)}
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                              title="編輯商戶"
+                            >
+                              ✏️
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        {getStatusBadge(award)}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        <button
+                          onClick={() => onToggleRedeemed(award.id)}
+                          className={`px-2 py-1 rounded text-xs ${
+                            award.redeemed
+                              ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              : 'bg-green-100 text-green-700 hover:bg-green-200'
+                          }`}
+                        >
+                          {award.redeemed ? '取消兌換' : '標記兌換'}
+                        </button>
+                        <button
+                          onClick={() => onEdit(award)}
+                          className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
+                        >
+                          編輯
+                        </button>
+                        <button
+                          onClick={() => onDelete(award.id)}
+                          className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
+                        >
+                          刪除
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
               {filteredAndSortedAwards.map((award) => (
-                <tr key={award.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {award.isThankYou ? (
-                        <span className="text-orange-600 font-semibold">謝謝惠顧</span>
-                      ) : (
-                        `${award.value} MOP`
-                      )}
+                <div key={award.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <div className="text-lg font-semibold text-gray-900 mb-1">
+                        {award.isThankYou ? (
+                          <span className="text-orange-600">謝謝惠顧</span>
+                        ) : (
+                          `${award.value} MOP`
+                        )}
+                      </div>
+                      <div className="text-sm text-gray-600 truncate" title={award.bank}>
+                        {award.bank}
+                      </div>
                     </div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 max-w-xs truncate" title={award.bank}>
-                      {award.bank}
+                    <div className="ml-2">
+                      {getStatusBadge(award)}
                     </div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {formatDate(award.drawDate)}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mb-3 text-sm">
+                    <div>
+                      <span className="text-gray-500">抽獎日期:</span>
+                      <div className="text-gray-900">{formatDate(award.drawDate)}</div>
                     </div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className={`text-sm ${isExpired(award) ? 'text-red-600 font-medium' : 'text-gray-900'}`}>
-                      {formatDate(award.expiryDate)}
+                    <div>
+                      <span className="text-gray-500">到期日期:</span>
+                      <div className={`font-medium ${isExpired(award) ? 'text-red-600' : 'text-gray-900'}`}>
+                        {formatDate(award.expiryDate)}
+                      </div>
                     </div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  </div>
+
+                  <div className="mb-3">
+                    <span className="text-sm text-gray-500">商戶:</span>
                     {editingMerchant === award.id ? (
-                      <div className="relative">
+                      <div className="relative mt-1">
                         <div className="flex items-center space-x-2">
                           <div className="relative flex-1">
                             <input
@@ -333,13 +493,12 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
                                 }
                               }}
                               onBlur={() => {
-                                // Delay hiding suggestions to allow click on suggestion
                                 setTimeout(() => {
                                   setShowMerchantSuggestions(false);
                                   setSelectedSuggestionIndex(-1);
                                 }, 200);
                               }}
-                              className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-gray-800"
+                              className="text-sm border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-gray-800 min-h-[44px]"
                               placeholder="輸入商戶名稱"
                               autoFocus
                             />
@@ -349,7 +508,6 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
                               </div>
                             )}
                             
-                            {/* Merchant Suggestions Dropdown */}
                             {showMerchantSuggestions && (
                               <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-32 overflow-y-auto">
                                 {getFilteredMerchantSuggestions(merchantValue).length > 0 ? (
@@ -376,14 +534,14 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
                           </div>
                           <button
                             onClick={() => handleSaveMerchant(award.id)}
-                            className="text-green-600 hover:text-green-800 text-sm"
+                            className="text-green-600 hover:text-green-800 text-sm min-h-[44px] min-w-[44px] flex items-center justify-center"
                             title="保存"
                           >
                             ✓
                           </button>
                           <button
                             onClick={handleCancelMerchantEdit}
-                            className="text-red-600 hover:text-red-800 text-sm"
+                            className="text-red-600 hover:text-red-800 text-sm min-h-[44px] min-w-[44px] flex items-center justify-center"
                             title="取消"
                           >
                             ✕
@@ -391,27 +549,25 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm text-gray-900">
-                          {award.merchant || '-'}
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-gray-900">
+                          {award.merchant || '未設定'}
                         </span>
                         <button
                           onClick={() => handleEditMerchant(award)}
-                          className="text-blue-600 hover:text-blue-800 text-sm"
+                          className="text-blue-600 hover:text-blue-800 text-sm ml-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="編輯商戶"
                         >
                           ✏️
                         </button>
                       </div>
                     )}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    {getStatusBadge(award)}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => onToggleRedeemed(award.id)}
-                      className={`px-2 py-1 rounded text-xs ${
+                      className={`px-3 py-2 rounded text-sm font-medium min-h-[44px] flex-1 ${
                         award.redeemed
                           ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           : 'bg-green-100 text-green-700 hover:bg-green-200'
@@ -421,21 +577,21 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
                     </button>
                     <button
                       onClick={() => onEdit(award)}
-                      className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
+                      className="px-3 py-2 bg-blue-100 text-blue-700 rounded text-sm font-medium hover:bg-blue-200 min-h-[44px] flex-1"
                     >
                       編輯
                     </button>
                     <button
                       onClick={() => onDelete(award.id)}
-                      className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
+                      className="px-3 py-2 bg-red-100 text-red-700 rounded text-sm font-medium hover:bg-red-200 min-h-[44px] flex-1"
                     >
                       刪除
                     </button>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </>
         )}
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { Award } from '../types/award';
+import { Award, BANKS } from '../types/award';
 
 const STORAGE_KEY = 'macau-spending-rewards-awards';
 
@@ -207,4 +207,33 @@ export const getAwardSummary = () => {
     topBigAwardBanks,
     expiredAwards,
   };
+};
+
+export const getBanksWithoutAwardsThisWeek = (): string[] => {
+  const awards = getAwards();
+  const now = new Date();
+
+  // Get the start of the current week (Monday)
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Monday
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  // Get the end of the current week (Sunday)
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+  endOfWeek.setHours(23, 59, 59, 999);
+
+  // Get awards from this week
+  const thisWeekAwards = awards.filter(award => {
+    const drawDate = new Date(award.drawDate);
+    return drawDate >= startOfWeek && drawDate <= endOfWeek;
+  });
+
+  // Get unique banks that have given awards this week
+  const banksWithAwardsThisWeek = new Set(
+    thisWeekAwards.map(award => award.bank)
+  );
+
+  // Return banks that haven't given awards this week
+  return BANKS.filter(bank => !banksWithAwardsThisWeek.has(bank));
 };

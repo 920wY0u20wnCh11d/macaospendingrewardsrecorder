@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Award } from '../types/award';
-import { getAwards, addAward, updateAward, deleteAward, getAwardSummary } from '../lib/storage';
+import { getAwards, addAward, updateAward, deleteAward, getAwardSummary, getBanksWithoutAwardsThisWeek } from '../lib/storage';
 import AwardForm from '../components/AwardForm';
 import AwardList from '../components/AwardList';
 import Summary from '../components/Summary';
@@ -12,9 +12,12 @@ export default function Home() {
   const [showForm, setShowForm] = useState(false);
   const [editingAward, setEditingAward] = useState<Award | undefined>();
   const [currentView, setCurrentView] = useState<'list' | 'summary'>('list');
+  const [banksWithoutAwards, setBanksWithoutAwards] = useState<string[]>([]);
 
   useEffect(() => {
-    setAwards(getAwards());
+    const loadedAwards = getAwards();
+    setAwards(loadedAwards);
+    setBanksWithoutAwards(getBanksWithoutAwardsThisWeek());
   }, []);
 
   const handleAddAward = (awardData: Omit<Award, 'id'> | Omit<Award, 'id'>[]) => {
@@ -27,6 +30,7 @@ export default function Home() {
       const newAward = addAward(awardData);
       setAwards(prev => [...prev, newAward]);
     }
+    setBanksWithoutAwards(getBanksWithoutAwardsThisWeek());
     setShowForm(false);
   };
 
@@ -50,6 +54,7 @@ export default function Home() {
         ));
       }
     }
+    setBanksWithoutAwards(getBanksWithoutAwardsThisWeek());
     setEditingAward(undefined);
     setShowForm(false);
   };
@@ -59,6 +64,7 @@ export default function Home() {
       const success = deleteAward(id);
       if (success) {
         setAwards(prev => prev.filter(award => award.id !== id));
+        setBanksWithoutAwards(getBanksWithoutAwardsThisWeek());
       }
     }
   };
@@ -77,6 +83,7 @@ export default function Home() {
       setAwards(prev => prev.map(award =>
         award.id === id ? updatedAward : award
       ));
+      setBanksWithoutAwards(getBanksWithoutAwardsThisWeek());
     }
   };
 
@@ -91,6 +98,7 @@ export default function Home() {
       setAwards(prev => prev.map(award =>
         award.id === id ? updatedAward : award
       ));
+      setBanksWithoutAwards(getBanksWithoutAwardsThisWeek());
     }
   };
 
@@ -159,6 +167,7 @@ export default function Home() {
         // Note: In a real app, you might want to merge data instead of replacing
         localStorage.setItem('macau-spending-rewards-awards', JSON.stringify(validAwards));
         setAwards(validAwards);
+        setBanksWithoutAwards(getBanksWithoutAwardsThisWeek());
 
         alert(`成功匯入 ${validAwards.length} 個獎品記錄！`);
       } catch (error) {
@@ -194,10 +203,10 @@ export default function Home() {
 
         {/* Navigation */}
         <div className="mb-6">
-          <div className="flex space-x-1 bg-white p-1 rounded-lg shadow-sm border">
+          <div className="flex flex-col sm:flex-row gap-2 bg-white p-2 sm:p-1 rounded-lg shadow-sm border">
             <button
               onClick={() => setCurrentView('list')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`px-4 py-3 sm:py-2 rounded-md text-sm font-medium transition-colors min-h-[44px] sm:min-h-auto ${
                 currentView === 'list'
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-700 hover:bg-gray-100'
@@ -207,7 +216,7 @@ export default function Home() {
             </button>
             <button
               onClick={() => setCurrentView('summary')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`px-4 py-3 sm:py-2 rounded-md text-sm font-medium transition-colors min-h-[44px] sm:min-h-auto ${
                 currentView === 'summary'
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-700 hover:bg-gray-100'
@@ -220,13 +229,13 @@ export default function Home() {
 
         {/* Add Award Button */}
         <div className="mb-6">
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => {
                 setEditingAward(undefined);
                 setShowForm(true);
               }}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors min-h-[48px] text-base font-medium"
             >
               + 新增獎品
             </button>
@@ -234,7 +243,7 @@ export default function Home() {
             <button
               onClick={handleExportData}
               disabled={awards.length === 0}
-              className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors ${
+              className={`px-6 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors min-h-[48px] text-base font-medium ${
                 awards.length === 0
                   ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                   : 'bg-green-600 text-white hover:bg-green-700'
@@ -244,7 +253,7 @@ export default function Home() {
               📥 導出數據
             </button>
             
-            <label className="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors cursor-pointer">
+            <label className="bg-orange-600 text-white px-6 py-3 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors cursor-pointer min-h-[48px] text-base font-medium flex items-center justify-center">
               📤 匯入數據
               <input
                 type="file"
@@ -256,11 +265,40 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Banks Without Awards This Week Notice */}
+        {banksWithoutAwards.length > 0 && (
+          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-yellow-800">
+                  本周尚未獲得獎品的銀行
+                </h3>
+                <div className="mt-2 text-sm text-yellow-700">
+                  <p>您還沒有從以下銀行獲得本周的獎品：</p>
+                  <ul className="mt-1 list-disc list-inside space-y-1">
+                    {banksWithoutAwards.map((bank, index) => (
+                      <li key={index} className="font-medium">{bank}</li>
+                    ))}
+                  </ul>
+                  <p className="mt-2">
+                    記得使用這些銀行的支付方式進行消費來獲得獎品機會！
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Form Modal */}
         {showForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50 modal-overlay">
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+              <div className="p-4 sm:p-6">
                 <AwardForm
                   award={editingAward}
                   onSave={editingAward ? handleUpdateAward : handleAddAward}

@@ -274,14 +274,14 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md border max-w-4xl mx-auto">
+    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border max-w-4xl mx-auto">
       <h2 className="text-xl font-bold mb-4 text-gray-800">
         {award ? '編輯獎品' : '新增獎品'}
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {awardForms.map((formData, index) => (
-          <div key={index} className="border border-gray-200 rounded-lg p-4 relative">
+          <div key={index} className="border border-gray-200 rounded-lg p-3 sm:p-4 relative">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-700">
                 獎品 {index + 1}
@@ -293,14 +293,14 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                 <button
                   type="button"
                   onClick={() => removeAwardForm(index)}
-                  className="text-red-500 hover:text-red-700 text-sm"
+                  className="text-red-500 hover:text-red-700 text-sm min-h-[44px] min-w-[44px] flex items-center justify-center"
                 >
                   移除
                 </button>
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   獎品面值 (MOP)
@@ -308,7 +308,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                 <select
                   value={formData.value}
                   onChange={(e) => handleValueChange(index, parseInt(e.target.value) as AwardValue)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                  className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 text-base min-h-[48px]"
                   required
                 >
                   <option value={0}>謝謝惠顧</option>
@@ -327,7 +327,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                 <select
                   value={formData.bank}
                   onChange={(e) => handleFormChange(index, 'bank', e.target.value as Bank)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                  className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 text-base min-h-[48px]"
                   required
                 >
                   {BANKS.map(bank => (
@@ -344,7 +344,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                   type="date"
                   value={formData.drawDate}
                   onChange={(e) => handleDrawDateChange(index, e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 ${
+                  className={`w-full px-3 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 text-base min-h-[48px] ${
                     drawDateErrors[index] ? 'border-red-500' : 'border-gray-300'
                   }`}
                   required
@@ -362,13 +362,13 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                   type="date"
                   value={formData.expiryDate}
                   readOnly
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 cursor-not-allowed text-gray-800"
+                  className="w-full px-3 py-3 border border-gray-300 rounded-md bg-gray-50 cursor-not-allowed text-gray-800 text-base min-h-[48px]"
                   title="到期日期根據抽獎日期自動計算"
                 />
                 <p className="text-gray-500 text-xs mt-1">根據抽獎日期自動計算</p>
               </div>
 
-              <div className="relative">
+              <div className="relative sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   商戶名稱
                 </label>
@@ -391,7 +391,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                       }, 200);
                     }}
                     placeholder="可選"
-                    className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                    className="w-full px-3 py-3 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 text-base min-h-[48px]"
                   />
                   {merchantSuggestions.length > 0 && (
                     <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
@@ -408,7 +408,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                         <div
                           key={suggestionIndex}
                           onClick={() => handleMerchantSuggestionSelect(index, suggestion)}
-                          className={`px-3 py-2 cursor-pointer text-sm border-b border-gray-100 last:border-b-0 ${
+                          className={`px-3 py-2 cursor-pointer text-sm border-b border-gray-100 last:border-b-0 min-h-[44px] flex items-center ${
                             suggestionIndex === selectedSuggestionIndex
                               ? 'bg-blue-100 text-blue-900'
                               : 'hover:bg-gray-100'
@@ -418,7 +418,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                         </div>
                       ))
                     ) : formData.merchant && (
-                      <div className="px-3 py-2 text-sm text-gray-500">
+                      <div className="px-3 py-2 text-sm text-gray-500 min-h-[44px] flex items-center">
                         無匹配的商戶建議
                       </div>
                     )}
@@ -426,7 +426,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                 )}
               </div>
 
-              <div>
+              <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   備註
                 </label>
@@ -435,18 +435,18 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                   value={formData.notes}
                   onChange={(e) => handleFormChange(index, 'notes', e.target.value)}
                   placeholder="可選"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                  className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 text-base min-h-[48px]"
                 />
               </div>
             </div>
 
-            <div className="flex items-center space-x-2 mt-4">
+            <div className="flex items-center space-x-3 mt-4">
               <input
                 type="checkbox"
                 id={`redeemed-${index}`}
                 checked={formData.redeemed}
                 onChange={(e) => handleFormChange(index, 'redeemed', e.target.checked)}
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
               />
               <label htmlFor={`redeemed-${index}`} className="text-sm font-medium text-gray-700">
                 已兌換
@@ -462,7 +462,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
                   type="date"
                   value={formData.redeemedDate}
                   onChange={(e) => handleFormChange(index, 'redeemedDate', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                  className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 text-base min-h-[48px]"
                   required={formData.redeemed}
                 />
               </div>
@@ -475,18 +475,18 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
             <button
               type="button"
               onClick={addAwardForm}
-              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
+              className="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors min-h-[48px] text-base font-medium"
             >
               + 添加另一個獎品
             </button>
           </div>
         )}
 
-        <div className="flex space-x-3 pt-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-3 pt-4">
           <button
             type="submit"
             disabled={drawDateErrors.some(error => error)}
-            className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+            className={`px-6 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors min-h-[48px] text-base font-medium flex-1 sm:flex-none ${
               drawDateErrors.some(error => error)
                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                 : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -497,7 +497,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
           <button
             type="button"
             onClick={onCancel}
-            className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+            className="bg-gray-500 text-white px-6 py-3 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors min-h-[48px] text-base font-medium flex-1 sm:flex-none"
           >
             取消
           </button>
