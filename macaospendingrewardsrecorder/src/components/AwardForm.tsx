@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Award, AwardValue, BANKS, Bank } from '../types/award';
 
 interface AwardFormData {
@@ -19,9 +19,10 @@ interface AwardFormProps {
   award?: Award;
   onSave: (awards: Omit<Award, 'id'>[]) => void;
   onCancel: () => void;
+  existingAwards?: Award[]; // Add this to get existing merchants
 }
 
-export default function AwardForm({ award, onSave, onCancel }: AwardFormProps) {
+export default function AwardForm({ award, onSave, onCancel, existingAwards = [] }: AwardFormProps) {
   const createEmptyAwardForm = (): AwardFormData => ({
     value: 10,
     drawDate: '',
@@ -34,8 +35,113 @@ export default function AwardForm({ award, onSave, onCancel }: AwardFormProps) {
     isThankYou: false,
   });
 
+  const createAwardFormWithToday = useCallback((inheritBank?: Bank): AwardFormData => {
+    // Set default draw date to today
+    const today = new Date();
+
+    // If today is Saturday or Sunday, set to next Monday
+    const defaultDate = new Date(today);
+    const dayOfWeek = today.getDay();
+    if (dayOfWeek === 0) { // Sunday
+      defaultDate.setDate(today.getDate() + 1); // Monday
+    } else if (dayOfWeek === 6) { // Saturday
+      defaultDate.setDate(today.getDate() + 2); // Monday
+    }
+
+    const defaultDateString = defaultDate.toISOString().split('T')[0];
+
+    const form = createEmptyAwardForm();
+    form.drawDate = defaultDateString;
+    form.expiryDate = calculateExpiryDate(defaultDateString);
+    
+    // Inherit bank from previous form if provided
+    if (inheritBank) {
+      form.bank = inheritBank;
+    }
+    
+    return form;
+  }, []);
+
   const [awardForms, setAwardForms] = useState<AwardFormData[]>([createEmptyAwardForm()]);
   const [drawDateErrors, setDrawDateErrors] = useState<string[]>(['']);
+  const [merchantSuggestions, setMerchantSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState<number | null>(null);
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
+
+  // Get unique merchants from existing awards
+  const getUniqueMerchants = useCallback(() => {
+    const merchants = existingAwards
+      .map(award => award.merchant)
+      .filter((merchant): merchant is string => merchant !== undefined && merchant.trim() !== '')
+      .filter((merchant, index, arr) => arr.indexOf(merchant) === index) // Remove duplicates
+      .sort();
+    return merchants;
+  }, [existingAwards]);
+
+  useEffect(() => {
+    setMerchantSuggestions(getUniqueMerchants());
+  }, [getUniqueMerchants]);
+
+  const handleMerchantChange = (index: number, value: string) => {
+    const newForms = [...awardForms];
+    newForms[index] = {
+      ...newForms[index],
+      merchant: value,
+    };
+    setAwardForms(newForms);
+    
+    // Show suggestions if there's input and we have suggestions
+    setShowSuggestions(value.length > 0 && merchantSuggestions.length > 0 ? index : null);
+    setSelectedSuggestionIndex(-1); // Reset selection when typing
+  };
+
+  const handleMerchantKeyDown = (index: number, e: React.KeyboardEvent) => {
+    const suggestions = getFilteredSuggestions(awardForms[index].merchant);
+    
+    if (!showSuggestions || suggestions.length === 0) return;
+    
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedSuggestionIndex(prev => 
+          prev < suggestions.length - 1 ? prev + 1 : 0
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedSuggestionIndex(prev => 
+          prev > 0 ? prev - 1 : suggestions.length - 1
+        );
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (selectedSuggestionIndex >= 0 && selectedSuggestionIndex < suggestions.length) {
+          handleMerchantSuggestionSelect(index, suggestions[selectedSuggestionIndex]);
+        }
+        break;
+      case 'Escape':
+        setShowSuggestions(null);
+        setSelectedSuggestionIndex(-1);
+        break;
+    }
+  };
+
+  const handleMerchantSuggestionSelect = (index: number, suggestion: string) => {
+    const newForms = [...awardForms];
+    newForms[index] = {
+      ...newForms[index],
+      merchant: suggestion,
+    };
+    setAwardForms(newForms);
+    setShowSuggestions(null);
+  };
+
+  const getFilteredSuggestions = (input: string) => {
+    if (!input) return [];
+    return merchantSuggestions.filter(merchant =>
+      merchant.toLowerCase().includes(input.toLowerCase())
+    ).slice(0, 5); // Limit to 5 suggestions
+  };
 
   const calculateExpiryDate = (drawDate: string): string => {
     const date = new Date(drawDate);
@@ -82,18 +188,11 @@ export default function AwardForm({ award, onSave, onCancel }: AwardFormProps) {
       setAwardForms([awardForm]);
       setDrawDateErrors(['']);
     } else {
-      // Set default draw date to today
-      const today = new Date();
-      const todayString = today.toISOString().split('T')[0];
-
-      const defaultForm = createEmptyAwardForm();
-      defaultForm.drawDate = todayString;
-      defaultForm.expiryDate = calculateExpiryDate(todayString);
-
+      const defaultForm = createAwardFormWithToday();
       setAwardForms([defaultForm]);
       setDrawDateErrors(['']);
     }
-  }, [award]);
+  }, [award, createAwardFormWithToday]);
 
   const handleDrawDateChange = (index: number, newDrawDate: string) => {
     const isValid = validateDrawDate(newDrawDate);
@@ -132,10 +231,12 @@ export default function AwardForm({ award, onSave, onCancel }: AwardFormProps) {
   };
 
   const addAwardForm = () => {
-    if (awardForms.length < 3) {
-      setAwardForms([...awardForms, createEmptyAwardForm()]);
-      setDrawDateErrors([...drawDateErrors, '']);
-    }
+    // Get the bank from the last form to inherit
+    const lastForm = awardForms[awardForms.length - 1];
+    const inheritBank = lastForm ? lastForm.bank : undefined;
+    
+    setAwardForms([...awardForms, createAwardFormWithToday(inheritBank)]);
+    setDrawDateErrors([...drawDateErrors, '']);
   };
 
   const removeAwardForm = (index: number) => {
@@ -267,17 +368,62 @@ export default function AwardForm({ award, onSave, onCancel }: AwardFormProps) {
                 <p className="text-gray-500 text-xs mt-1">根據抽獎日期自動計算</p>
               </div>
 
-              <div>
+              <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   商戶名稱
                 </label>
-                <input
-                  type="text"
-                  value={formData.merchant}
-                  onChange={(e) => handleFormChange(index, 'merchant', e.target.value)}
-                  placeholder="可選"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formData.merchant}
+                    onChange={(e) => handleMerchantChange(index, e.target.value)}
+                    onKeyDown={(e) => handleMerchantKeyDown(index, e)}
+                    onFocus={() => {
+                      if (formData.merchant && merchantSuggestions.length > 0) {
+                        setShowSuggestions(index);
+                      }
+                    }}
+                    onBlur={() => {
+                      // Delay hiding suggestions to allow click on suggestion
+                      setTimeout(() => {
+                        setShowSuggestions(null);
+                        setSelectedSuggestionIndex(-1);
+                      }, 200);
+                    }}
+                    placeholder="可選"
+                    className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {merchantSuggestions.length > 0 && (
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                      💡
+                    </div>
+                  )}
+                </div>
+                
+                {/* Merchant Suggestions Dropdown */}
+                {showSuggestions === index && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-40 overflow-y-auto">
+                    {getFilteredSuggestions(formData.merchant).length > 0 ? (
+                      getFilteredSuggestions(formData.merchant).map((suggestion, suggestionIndex) => (
+                        <div
+                          key={suggestionIndex}
+                          onClick={() => handleMerchantSuggestionSelect(index, suggestion)}
+                          className={`px-3 py-2 cursor-pointer text-sm border-b border-gray-100 last:border-b-0 ${
+                            suggestionIndex === selectedSuggestionIndex
+                              ? 'bg-blue-100 text-blue-900'
+                              : 'hover:bg-gray-100'
+                          }`}
+                        >
+                          {suggestion}
+                        </div>
+                      ))
+                    ) : formData.merchant && (
+                      <div className="px-3 py-2 text-sm text-gray-500">
+                        無匹配的商戶建議
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -324,7 +470,7 @@ export default function AwardForm({ award, onSave, onCancel }: AwardFormProps) {
           </div>
         ))}
 
-        {awardForms.length < 3 && !award && (
+        {awardForms.length >= 1 && !award && (
           <div className="text-center">
             <button
               type="button"
@@ -333,7 +479,6 @@ export default function AwardForm({ award, onSave, onCancel }: AwardFormProps) {
             >
               + 添加另一個獎品
             </button>
-            <p className="text-sm text-gray-500 mt-2">最多可以添加 3 個獎品</p>
           </div>
         )}
 

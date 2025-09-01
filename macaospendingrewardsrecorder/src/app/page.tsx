@@ -94,6 +94,84 @@ export default function Home() {
     }
   };
 
+  const handleExportData = () => {
+    try {
+      const dataToExport = {
+        awards: awards,
+        exportDate: new Date().toISOString(),
+        version: '1.0',
+        app: '澳門消費獎賞記錄器'
+      };
+
+      const dataStr = JSON.stringify(dataToExport, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `macau-spending-rewards-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      alert('數據已成功導出！');
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('導出失敗，請重試。');
+    }
+  };
+
+  const handleImportData = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const importedData = JSON.parse(content);
+
+        // Validate the imported data structure
+        if (!importedData.awards || !Array.isArray(importedData.awards)) {
+          throw new Error('無效的數據格式');
+        }
+
+        // Validate each award has required fields
+        const validAwards = importedData.awards.filter((award: Partial<Award>) => {
+          return award.id && award.value !== undefined && award.drawDate && award.expiryDate && award.bank;
+        });
+
+        if (validAwards.length === 0) {
+          throw new Error('沒有找到有效的獎品數據');
+        }
+
+        // Confirm import
+        const confirmed = confirm(
+          `確定要匯入 ${validAwards.length} 個獎品記錄嗎？\n\n` +
+          `這將會覆蓋現有的所有數據。\n` +
+          `建議先導出現有數據作為備份。`
+        );
+
+        if (!confirmed) return;
+
+        // Clear existing data and import new data
+        // Note: In a real app, you might want to merge data instead of replacing
+        localStorage.setItem('macau-spending-rewards-awards', JSON.stringify(validAwards));
+        setAwards(validAwards);
+
+        alert(`成功匯入 ${validAwards.length} 個獎品記錄！`);
+      } catch (error) {
+        console.error('Import failed:', error);
+        alert(`匯入失敗：${error instanceof Error ? error.message : '未知錯誤'}`);
+      }
+    };
+
+    reader.readAsText(file);
+    // Reset the input so the same file can be selected again
+    event.target.value = '';
+  };
+
   const handleCancelForm = () => {
     setShowForm(false);
     setEditingAward(undefined);
@@ -142,15 +220,40 @@ export default function Home() {
 
         {/* Add Award Button */}
         <div className="mb-6">
-          <button
-            onClick={() => {
-              setEditingAward(undefined);
-              setShowForm(true);
-            }}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-          >
-            + 新增獎品
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => {
+                setEditingAward(undefined);
+                setShowForm(true);
+              }}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            >
+              + 新增獎品
+            </button>
+            
+            <button
+              onClick={handleExportData}
+              disabled={awards.length === 0}
+              className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors ${
+                awards.length === 0
+                  ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                  : 'bg-green-600 text-white hover:bg-green-700'
+              }`}
+              title={awards.length === 0 ? '沒有數據可導出' : '導出所有獎品數據'}
+            >
+              📥 導出數據
+            </button>
+            
+            <label className="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors cursor-pointer">
+              📤 匯入數據
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleImportData}
+                className="hidden"
+              />
+            </label>
+          </div>
         </div>
 
         {/* Form Modal */}
@@ -162,6 +265,7 @@ export default function Home() {
                   award={editingAward}
                   onSave={editingAward ? handleUpdateAward : handleAddAward}
                   onCancel={handleCancelForm}
+                  existingAwards={awards}
                 />
               </div>
             </div>
@@ -189,6 +293,7 @@ export default function Home() {
             <p><strong>電子優惠面值：</strong>10、20、50、100 或 200 澳門元</p>
             <p><strong>兌換期限：</strong>獲得後緊接的周六及周日</p>
             <p><strong>注意：</strong>逾期無效，不可轉讓或兌現</p>
+            <p>Don’t thank me, give a hug to Grok!</p>
           </div>
         </div>
       </div>

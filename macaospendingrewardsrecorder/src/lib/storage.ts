@@ -71,11 +71,52 @@ export const getAwardSummary = () => {
     .reduce((sum, award) => sum + award.value, 0);
   const pendingValue = totalValue - redeemedValue;
 
-  // Group by value
+  // Group by value with redeemed/pending breakdown
   const valueDistribution = awards.reduce((acc, award) => {
     acc[award.value] = (acc[award.value] || 0) + 1;
     return acc;
   }, {} as Record<number, number>);
+
+  // Detailed value statistics with redeemed/pending breakdown
+  const detailedValueStats = awards.reduce((acc, award) => {
+    if (!acc[award.value]) {
+      acc[award.value] = {
+        total: 0,
+        redeemed: 0,
+        pending: 0,
+        expired: 0,
+        totalValue: 0,
+        redeemedValue: 0,
+        pendingValue: 0
+      };
+    }
+    
+    acc[award.value].total += 1;
+    acc[award.value].totalValue += award.value;
+    
+    if (award.redeemed) {
+      acc[award.value].redeemed += 1;
+      acc[award.value].redeemedValue += award.value;
+    } else {
+      acc[award.value].pending += 1;
+      acc[award.value].pendingValue += award.value;
+      
+      // Check if expired
+      if (new Date(award.expiryDate) < new Date()) {
+        acc[award.value].expired += 1;
+      }
+    }
+    
+    return acc;
+  }, {} as Record<number, {
+    total: number;
+    redeemed: number;
+    pending: number;
+    expired: number;
+    totalValue: number;
+    redeemedValue: number;
+    pendingValue: number;
+  }>);
 
   // Group by bank
   const bankDistribution = awards.reduce((acc, award) => {
@@ -146,6 +187,11 @@ export const getAwardSummary = () => {
     !award.redeemed && new Date(award.expiryDate) < now
   ).length;
 
+  // Calculate expired value
+  const expiredValue = awards
+    .filter(award => !award.redeemed && new Date(award.expiryDate) < now)
+    .reduce((sum, award) => sum + award.value, 0);
+
   return {
     totalAwards,
     redeemedAwards,
@@ -153,7 +199,9 @@ export const getAwardSummary = () => {
     totalValue,
     redeemedValue,
     pendingValue,
+    expiredValue,
     valueDistribution,
+    detailedValueStats,
     bankDistribution,
     bankValueDistribution,
     topBigAwardBanks,
