@@ -21,8 +21,6 @@ interface AwardFormProps {
   onCancel: () => void;
 }
 
-const AWARD_VALUES: AwardValue[] = [0, 10, 20, 50, 100, 200];
-
 export default function AwardForm({ award, onSave, onCancel }: AwardFormProps) {
   const createEmptyAwardForm = (): AwardFormData => ({
     value: 10,
@@ -124,7 +122,7 @@ export default function AwardForm({ award, onSave, onCancel }: AwardFormProps) {
     setAwardForms(newForms);
   };
 
-  const handleFormChange = (index: number, field: keyof AwardFormData, value: any) => {
+  const handleFormChange = (index: number, field: keyof AwardFormData, value: string | boolean | Bank) => {
     const newForms = [...awardForms];
     newForms[index] = {
       ...newForms[index],

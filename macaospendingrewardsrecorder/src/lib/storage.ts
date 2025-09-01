@@ -10,7 +10,7 @@ export const getAwards = (): Award[] => {
 
     const awards = JSON.parse(stored);
     // Migrate old awards that don't have bank field or isThankYou field
-    return awards.map((award: any) => ({
+    return awards.map((award: Partial<Award>) => ({
       ...award,
       bank: award.bank || '螞蟻銀行（澳門）股份有限公司', // Default to first bank for backward compatibility
       isThankYou: award.isThankYou !== undefined ? award.isThankYou : award.value === 0 // Set isThankYou based on value for old records
@@ -53,7 +53,7 @@ export const updateAward = (id: string, updates: Partial<Award>): Award | null =
 
 export const deleteAward = (id: string): boolean => {
   const awards = getAwards();
-  const filteredAwards = awards.filter(award => award.id !== id);
+    const filteredAwards = awards.filter((award) => award.id !== id);
   if (filteredAwards.length === awards.length) return false;
 
   saveAwards(filteredAwards);
@@ -122,7 +122,7 @@ export const getAwardSummary = () => {
 
   // Get top 3 banks for big awards (by probability, then by total big awards)
   const topBigAwardBanks = Object.entries(bankValueDistribution)
-    .filter(([_, data]) => data.totalAwards > 0)
+    .filter(([, data]) => data.totalAwards > 0)
     .sort((a, b) => {
       // First sort by probability
       if (b[1].probability !== a[1].probability) {
