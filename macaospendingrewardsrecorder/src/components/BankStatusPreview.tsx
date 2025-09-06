@@ -101,24 +101,44 @@ export default function BankStatusPreview({ awards }: BankStatusPreviewProps) {
       </h2>
 
       {/* Mobile Simple List View */}
-      <div className="block md:hidden space-y-2">
-        {bankStatus.map((bank) => (
-          <div key={bank.bank} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-gray-900 truncate" title={bank.bank}>
-                {bank.bank}
-              </div>
-            </div>
-            <div className="flex items-center space-x-3 ml-2">
-              <span className="text-sm font-medium text-blue-600">
-                {bank.pendingValue + bank.redeemedValue} MOP
-              </span>
-              <span className="text-lg">
-                {getStatusEmoji(bank.status)}
-              </span>
+      <div className="block md:hidden">
+        {/* Mobile Table Header */}
+        <div className="flex items-center justify-between py-2 px-3 bg-gray-100 rounded-lg mb-2">
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-medium text-gray-700 uppercase tracking-wider">
+              承辦單位
             </div>
           </div>
-        ))}
+          <div className="flex items-center space-x-3 ml-2">
+            <div className="text-xs font-medium text-gray-700 uppercase tracking-wider">
+              消費金額
+            </div>
+            <div className="text-xs font-medium text-gray-700 uppercase tracking-wider">
+              狀態
+            </div>
+          </div>
+        </div>
+        
+        {/* Mobile Table Rows */}
+        <div className="space-y-2">
+          {bankStatus.map((bank) => (
+            <div key={bank.bank} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-gray-900 truncate" title={bank.bank}>
+                  {bank.bank}
+                </div>
+              </div>
+              <div className="flex items-center space-x-3 ml-2">
+                <span className="text-sm font-medium text-blue-600">
+                  {bank.pendingValue + bank.redeemedValue} MOP
+                </span>
+                <span className="text-lg">
+                  {getStatusEmoji(bank.status)}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
         
         {/* Status Legend */}
         <div className="mt-4 p-3 bg-gray-50 rounded-lg">
