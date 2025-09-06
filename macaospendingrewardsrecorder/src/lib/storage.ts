@@ -69,7 +69,7 @@ export const getAwardSummary = () => {
   const redeemedValue = awards
     .filter(award => award.redeemed)
     .reduce((sum, award) => sum + award.value, 0);
-  const pendingValue = totalValue - redeemedValue;
+  const pendingValue = (totalValue - redeemedValue) * 3;
 
   // Group by value with redeemed/pending breakdown
   const valueDistribution = awards.reduce((acc, award) => {
@@ -190,7 +190,7 @@ export const getAwardSummary = () => {
   // Calculate expired value
   const expiredValue = awards
     .filter(award => !award.redeemed && new Date(award.expiryDate) < now)
-    .reduce((sum, award) => sum + award.value, 0);
+    .reduce((sum, award) => sum + award.value, 0) * 3;
 
   return {
     totalAwards,

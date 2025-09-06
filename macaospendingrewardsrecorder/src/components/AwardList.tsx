@@ -211,6 +211,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 min-h-[44px]"
+                suppressHydrationWarning
               />
               {searchTerm && (
                 <button
@@ -227,6 +228,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
               value={filter}
               onChange={(e) => setFilter(e.target.value as typeof filter)}
               className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 min-h-[44px]"
+              suppressHydrationWarning
             >
               <option value="all">全部</option>
               <option value="pending">待兌換</option>
@@ -238,6 +240,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
               className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 min-h-[44px]"
+              suppressHydrationWarning
             >
               <option value="date">按日期排序</option>
               <option value="value">按面值排序</option>
@@ -251,6 +254,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
               className="px-3 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px] min-w-[44px] flex items-center justify-center"
               title={`切換排序順序 (${sortOrder === 'asc' ? '升序' : '降序'})`}
+              suppressHydrationWarning
             >
               {sortOrder === 'asc' ? '↑' : '↓'}
             </button>
@@ -345,6 +349,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
                                   className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-gray-800"
                                   placeholder="輸入商戶名稱"
                                   autoFocus
+                                  suppressHydrationWarning
                                 />
                                 {merchantSuggestions.length > 0 && (
                                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
@@ -501,6 +506,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
                               className="text-sm border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-gray-800 min-h-[44px]"
                               placeholder="輸入商戶名稱"
                               autoFocus
+                              suppressHydrationWarning
                             />
                             {merchantSuggestions.length > 0 && (
                               <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none">

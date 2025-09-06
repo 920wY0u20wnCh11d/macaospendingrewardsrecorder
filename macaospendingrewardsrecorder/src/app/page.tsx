@@ -6,6 +6,7 @@ import { getAwards, addAward, updateAward, deleteAward, getAwardSummary, getBank
 import AwardForm from '../components/AwardForm';
 import AwardList from '../components/AwardList';
 import Summary from '../components/Summary';
+import BankStatusPreview from '../components/BankStatusPreview';
 
 export default function Home() {
   const [awards, setAwards] = useState<Award[]>([]);
@@ -266,7 +267,7 @@ export default function Home() {
         </div>
 
         {/* Banks Without Awards This Week Notice */}
-        {banksWithoutAwards.length > 0 && (
+        {/*{banksWithoutAwards.length > 0 && (
           <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <div className="flex items-start">
               <div className="flex-shrink-0">
@@ -292,7 +293,10 @@ export default function Home() {
               </div>
             </div>
           </div>
-        )}
+        )} */}
+
+        {/* Bank Status Preview */}
+        {currentView !== 'summary' && <BankStatusPreview awards={awards} />}
 
         {/* Form Modal */}
         {showForm && (

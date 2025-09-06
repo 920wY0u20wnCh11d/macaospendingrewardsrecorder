@@ -97,12 +97,14 @@ export default function Summary({ summary }: SummaryProps) {
 
           <div className="text-center bg-white p-4 rounded-lg shadow-sm">
             <div className="text-xl font-bold text-yellow-600">{formatCurrency(summary.pendingValue)}</div>
-            <div className="text-sm text-gray-600">待兌換價值</div>
+            <div className="text-sm text-gray-600">待消費金額</div>
+            <div className="text-xs text-yellow-600">需消費3倍獎品額度</div>
           </div>
 
           <div className="text-center bg-white p-4 rounded-lg shadow-sm">
             <div className="text-xl font-bold text-red-600">{formatCurrency(summary.expiredValue)}</div>
-            <div className="text-sm text-gray-600">已過期價值</div>
+            <div className="text-sm text-gray-600">已過期消費金額</div>
+            <div className="text-xs text-red-600">逾期未兌換</div>
           </div>
         </div>
       </div>
