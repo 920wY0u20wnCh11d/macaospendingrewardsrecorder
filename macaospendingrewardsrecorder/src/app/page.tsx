@@ -7,12 +7,13 @@ import AwardForm from '../components/AwardForm';
 import AwardList from '../components/AwardList';
 import Summary from '../components/Summary';
 import BankStatusPreview from '../components/BankStatusPreview';
+import TrendReport from '../components/TrendReport';
 
 export default function Home() {
   const [awards, setAwards] = useState<Award[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingAward, setEditingAward] = useState<Award | undefined>();
-  const [currentView, setCurrentView] = useState<'list' | 'summary'>('list');
+  const [currentView, setCurrentView] = useState<'list' | 'summary' | 'trend'>('list');
 
   useEffect(() => {
     const loadedAwards = getAwards();
@@ -217,6 +218,16 @@ export default function Home() {
             >
               統計摘要
             </button>
+            <button
+              onClick={() => setCurrentView('trend')}
+              className={`px-4 py-3 sm:py-2 rounded-md text-sm font-medium transition-colors min-h-[44px] sm:min-h-auto ${
+                currentView === 'trend'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              趨勢分析
+            </button>
           </div>
         </div>
 
@@ -259,7 +270,7 @@ export default function Home() {
         </div>
 
         {/* Bank Status Preview */}
-        {currentView !== 'summary' && <BankStatusPreview awards={awards} />}
+        {currentView === 'list' && <BankStatusPreview awards={awards} />}
 
         {/* Form Modal */}
         {showForm && (
@@ -286,8 +297,10 @@ export default function Home() {
             onToggleRedeemed={handleToggleRedeemed}
             onUpdateMerchant={handleUpdateMerchant}
           />
-        ) : (
+        ) : currentView === 'summary' ? (
           <Summary summary={summary} />
+        ) : (
+          <TrendReport awards={awards} />
         )}
 
         {/* Footer Info */}

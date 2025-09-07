@@ -235,7 +235,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
             </span>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col sm:flex-row gap-2" suppressHydrationWarning={true}>
             <div className="relative flex-1">
               <input
                 type="text"

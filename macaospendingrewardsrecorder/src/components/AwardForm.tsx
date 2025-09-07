@@ -36,17 +36,17 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
   });
 
   const createAwardFormWithToday = useCallback((inheritBank?: Bank): AwardFormData => {
-    // Set default draw date to today
+    // Set default draw date to the closest Monday-Friday
     const today = new Date();
-
-    // If today is Saturday or Sunday, set to next Monday
     const defaultDate = new Date(today);
-    const dayOfWeek = today.getDay();
-    if (dayOfWeek === 0) { // Sunday
-      defaultDate.setDate(today.getDate() + 1); // Monday
-    } else if (dayOfWeek === 6) { // Saturday
-      defaultDate.setDate(today.getDate() + 2); // Monday
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+
+    if (dayOfWeek === 0) { // Sunday - use Monday (next day)
+      defaultDate.setDate(today.getDate() + 1);
+    } else if (dayOfWeek === 6) { // Saturday - use Friday (previous day)
+      defaultDate.setDate(today.getDate() - 1);
     }
+    // Monday-Friday (1-5) - use today as is
 
     const defaultDateString = defaultDate.toISOString().split('T')[0];
 
