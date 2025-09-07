@@ -41,10 +41,8 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
     const defaultDate = new Date(today);
     const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
 
-    if (dayOfWeek === 0) { // Sunday - use Monday (next day)
+    if (dayOfWeek === 0 || dayOfWeek === 6) { // Sunday - use Monday (next day)
       defaultDate.setDate(today.getDate() + 1);
-    } else if (dayOfWeek === 6) { // Saturday - use Friday (previous day)
-      defaultDate.setDate(today.getDate() - 1);
     }
     // Monday-Friday (1-5) - use today as is
 
