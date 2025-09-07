@@ -48,7 +48,12 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
     }
     // Monday-Friday (1-5) - use today as is
 
-    const defaultDateString = defaultDate.toISOString().split('T')[0];
+    // Use local time for date string (YYYY-MM-DD)
+    const defaultDateString = [
+      defaultDate.getFullYear(),
+      String(defaultDate.getMonth() + 1).padStart(2, '0'),
+      String(defaultDate.getDate()).padStart(2, '0')
+    ].join('-');
 
     const form = createEmptyAwardForm();
     form.drawDate = defaultDateString;
