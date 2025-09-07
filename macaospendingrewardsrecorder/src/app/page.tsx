@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Award } from '../types/award';
-import { getAwards, addAward, updateAward, deleteAward, getAwardSummary, getBanksWithoutAwardsThisWeek } from '../lib/storage';
+import { getAwards, addAward, updateAward, deleteAward, getAwardSummary } from '../lib/storage';
 import AwardForm from '../components/AwardForm';
 import AwardList from '../components/AwardList';
 import Summary from '../components/Summary';
@@ -13,12 +13,10 @@ export default function Home() {
   const [showForm, setShowForm] = useState(false);
   const [editingAward, setEditingAward] = useState<Award | undefined>();
   const [currentView, setCurrentView] = useState<'list' | 'summary'>('list');
-  const [banksWithoutAwards, setBanksWithoutAwards] = useState<string[]>([]);
 
   useEffect(() => {
     const loadedAwards = getAwards();
     setAwards(loadedAwards);
-    setBanksWithoutAwards(getBanksWithoutAwardsThisWeek());
   }, []);
 
   const handleAddAward = (awardData: Omit<Award, 'id'> | Omit<Award, 'id'>[]) => {
@@ -31,7 +29,6 @@ export default function Home() {
       const newAward = addAward(awardData);
       setAwards(prev => [...prev, newAward]);
     }
-    setBanksWithoutAwards(getBanksWithoutAwardsThisWeek());
     setShowForm(false);
   };
 
@@ -55,7 +52,6 @@ export default function Home() {
         ));
       }
     }
-    setBanksWithoutAwards(getBanksWithoutAwardsThisWeek());
     setEditingAward(undefined);
     setShowForm(false);
   };
@@ -65,7 +61,6 @@ export default function Home() {
       const success = deleteAward(id);
       if (success) {
         setAwards(prev => prev.filter(award => award.id !== id));
-        setBanksWithoutAwards(getBanksWithoutAwardsThisWeek());
       }
     }
   };
@@ -84,7 +79,6 @@ export default function Home() {
       setAwards(prev => prev.map(award =>
         award.id === id ? updatedAward : award
       ));
-      setBanksWithoutAwards(getBanksWithoutAwardsThisWeek());
     }
   };
 
@@ -99,7 +93,6 @@ export default function Home() {
       setAwards(prev => prev.map(award =>
         award.id === id ? updatedAward : award
       ));
-      setBanksWithoutAwards(getBanksWithoutAwardsThisWeek());
     }
   };
 
@@ -168,7 +161,6 @@ export default function Home() {
         // Note: In a real app, you might want to merge data instead of replacing
         localStorage.setItem('macau-spending-rewards-awards', JSON.stringify(validAwards));
         setAwards(validAwards);
-        setBanksWithoutAwards(getBanksWithoutAwardsThisWeek());
 
         alert(`成功匯入 ${validAwards.length} 個獎品記錄！`);
       } catch (error) {
@@ -266,35 +258,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Banks Without Awards This Week Notice */}
-        {/*{banksWithoutAwards.length > 0 && (
-          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-yellow-800">
-                  本周尚未獲得獎品的銀行
-                </h3>
-                <div className="mt-2 text-sm text-yellow-700">
-                  <p>您還沒有從以下銀行獲得本周的獎品：</p>
-                  <ul className="mt-1 list-disc list-inside space-y-1">
-                    {banksWithoutAwards.map((bank, index) => (
-                      <li key={index} className="font-medium">{bank}</li>
-                    ))}
-                  </ul>
-                  <p className="mt-2">
-                    記得使用這些銀行的支付方式進行消費來獲得獎品機會！
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )} */}
-
         {/* Bank Status Preview */}
         {currentView !== 'summary' && <BankStatusPreview awards={awards} />}
 
@@ -332,6 +295,9 @@ export default function Home() {
           <h3 className="text-lg font-semibold mb-4 text-gray-800">活動資訊</h3>
           <div className="text-sm text-gray-600 space-y-2">
             <p><strong>活動期間：</strong>2025年9月1日 00:00 至 2025年11月30日 23:59</p>
+            <p><strong>抽獎時間：</strong>星期一至星期五</p>
+            <p><strong>使用期限：</strong>只能在星期六或星期日使用</p>
+            <p><strong>新一輪開始：</strong>下一個星期一淩晨重新開始新一輪</p>
             <p><strong>電子優惠面值：</strong>10、20、50、100 或 200 澳門元</p>
             <p><strong>兌換期限：</strong>獲得後緊接的周六及周日</p>
             <p><strong>注意：</strong>逾期無效，不可轉讓或兌現</p>

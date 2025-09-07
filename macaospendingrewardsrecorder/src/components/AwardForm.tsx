@@ -168,8 +168,8 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
   const validateDrawDate = (dateString: string): boolean => {
     const date = new Date(dateString);
     const dayOfWeek = date.getDay();
-    // 0 = Sunday, 6 = Saturday - these are not allowed
-    return dayOfWeek !== 0 && dayOfWeek !== 6;
+    // Only Monday to Friday are allowed (1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday)
+    return dayOfWeek >= 1 && dayOfWeek <= 5;
   };
 
   useEffect(() => {
@@ -197,7 +197,7 @@ export default function AwardForm({ award, onSave, onCancel, existingAwards = []
   const handleDrawDateChange = (index: number, newDrawDate: string) => {
     const isValid = validateDrawDate(newDrawDate);
     const newErrors = [...drawDateErrors];
-    newErrors[index] = isValid ? '' : '抽獎日期不能是星期六或星期日';
+    newErrors[index] = isValid ? '' : '抽獎日期只能是星期一至星期五';
 
     setDrawDateErrors(newErrors);
 

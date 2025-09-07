@@ -21,10 +21,14 @@ export default function BankStatusPreview({ awards }: BankStatusPreviewProps) {
     
     // Calculate Monday of current week
     const monday = new Date(now);
-    monday.setDate(now.getDate() - currentDay + 1);
+    // If Sunday (0), subtract 6 days to get Monday of current week
+    // If Monday (1), subtract 0 days (stay on Monday)
+    // If Tuesday (2), subtract 1 day, etc.
+    const daysToSubtract = currentDay === 0 ? 6 : currentDay - 1;
+    monday.setDate(now.getDate() - daysToSubtract);
     monday.setHours(0, 0, 0, 0);
     
-    // Calculate Sunday of current week
+    // Calculate Sunday of current week (Monday + 6 days)
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
     sunday.setHours(23, 59, 59, 999);
@@ -53,7 +57,8 @@ export default function BankStatusPreview({ awards }: BankStatusPreviewProps) {
     const awardDisplay = totalAwardValue === 0 ? '0' : `${totalAwardValue}${awardAmountsStr}`;
     
     // Calculate consumption amounts (3x award value)
-    const pendingValue = bankAwards
+    const totalConsumableValue = bankAwards.reduce((sum, award) => sum + (award.value * 3), 0);
+    const pendingConsumptionValue = bankAwards
       .filter(award => !award.redeemed)
       .reduce((sum, award) => sum + (award.value * 3), 0);
     
@@ -68,7 +73,8 @@ export default function BankStatusPreview({ awards }: BankStatusPreviewProps) {
       pendingAwards,
       totalAwardValue,
       awardDisplay,
-      pendingValue,
+      totalConsumableValue,
+      pendingConsumptionValue,
       redeemedValue,
       status: totalAwards === 0 ? 'no-awards' :
               pendingAwards > 0 ? 'pending' : 'completed'
@@ -111,7 +117,7 @@ export default function BankStatusPreview({ awards }: BankStatusPreviewProps) {
           </div>
           <div className="flex items-center space-x-3 ml-2">
             <div className="text-xs font-medium text-gray-700 uppercase tracking-wider">
-              消費金額
+              可消費/(待消費)
             </div>
             <div className="text-xs font-medium text-gray-700 uppercase tracking-wider">
               狀態
@@ -130,7 +136,7 @@ export default function BankStatusPreview({ awards }: BankStatusPreviewProps) {
               </div>
               <div className="flex items-center space-x-3 ml-2">
                 <span className="text-sm font-medium text-blue-600">
-                  {bank.pendingValue + bank.redeemedValue} MOP
+                  {bank.totalConsumableValue}/({bank.pendingConsumptionValue}) MOP
                 </span>
                 <span className="text-lg">
                   {getStatusEmoji(bank.status)}
@@ -175,7 +181,7 @@ export default function BankStatusPreview({ awards }: BankStatusPreviewProps) {
                 獎品額度
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                消費金額
+                可消費金額/(待消費金額)
               </th>
             </tr>
           </thead>
@@ -197,7 +203,7 @@ export default function BankStatusPreview({ awards }: BankStatusPreviewProps) {
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
                   <span className="text-sm font-medium text-blue-600">
-                    {bank.pendingValue + bank.redeemedValue} MOP
+                    {bank.totalConsumableValue}/({bank.pendingConsumptionValue}) MOP
                   </span>
                 </td>
               </tr>
@@ -211,16 +217,16 @@ export default function BankStatusPreview({ awards }: BankStatusPreviewProps) {
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
             <div className="text-lg font-bold text-blue-600">
-              {bankStatus.reduce((sum, b) => sum + b.pendingValue, 0)} MOP
+              {bankStatus.reduce((sum, b) => sum + b.totalConsumableValue, 0)} MOP
             </div>
-            <div className="text-sm text-blue-800">本周待消費金額</div>
+            <div className="text-sm text-blue-800">本周可消費金額</div>
           </div>
 
-          <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-            <div className="text-lg font-bold text-green-600">
-              {bankStatus.reduce((sum, b) => sum + b.redeemedValue, 0)} MOP
+          <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+            <div className="text-lg font-bold text-orange-600">
+              {bankStatus.reduce((sum, b) => sum + b.pendingConsumptionValue, 0)} MOP
             </div>
-            <div className="text-sm text-green-800">本周已消費金額</div>
+            <div className="text-sm text-orange-800">本周待消費金額</div>
           </div>
         </div>
       </div>

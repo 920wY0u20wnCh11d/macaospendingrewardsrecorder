@@ -49,7 +49,12 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
   };
 
   const isExpired = (award: Award) => {
-    return !award.redeemed && new Date(award.expiryDate) < new Date();
+    // Compare only the date part (ignore time)
+    const expiry = new Date(award.expiryDate);
+    const today = new Date();
+    expiry.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    return !award.redeemed && expiry < today;
   };
 
   const filteredAndSortedAwards = awards
@@ -57,7 +62,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
       // First apply status filter
       switch (filter) {
         case 'pending':
-          if (award.redeemed) return false;
+          if (award.redeemed || isExpired(award)) return false;
           break;
         case 'redeemed':
           if (!award.redeemed) return false;
@@ -93,10 +98,27 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
           comparison = b.value - a.value;
           break;
         case 'status':
-          if (a.redeemed === b.redeemed) {
-            comparison = new Date(b.drawDate).getTime() - new Date(a.drawDate).getTime();
+          // Define status priority: usable > waiting > redeemed > expired
+          const getStatusPriority = (award: Award) => {
+            if (award.redeemed) return 2; // 已兌換
+            if (isExpired(award)) return 3; // 已過期
+            
+            const today = new Date();
+            const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
+            const isUsagePeriod = dayOfWeek === 0 || dayOfWeek === 6;
+            
+            if (isUsagePeriod) return 0; // 可使用 (highest priority)
+            return 1; // 等待使用期
+          };
+          
+          const priorityA = getStatusPriority(a);
+          const priorityB = getStatusPriority(b);
+          
+          if (priorityA !== priorityB) {
+            comparison = priorityA - priorityB;
           } else {
-            comparison = a.redeemed ? 1 : -1;
+            // Same priority, sort by date
+            comparison = new Date(b.drawDate).getTime() - new Date(a.drawDate).getTime();
           }
           break;
         case 'bank':
@@ -124,7 +146,17 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
     if (isExpired(award)) {
       return <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">已過期</span>;
     }
-    return <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">待兌換</span>;
+
+    // Check if we're in usage period (Saturday or Sunday)
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
+    const isUsagePeriod = dayOfWeek === 0 || dayOfWeek === 6;
+
+    if (isUsagePeriod) {
+      return <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">可使用</span>;
+    } else {
+      return <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">等待使用期</span>;
+    }
   };
 
   const handleEditMerchant = (award: Award) => {
@@ -231,7 +263,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
               suppressHydrationWarning
             >
               <option value="all">全部</option>
-              <option value="pending">待兌換</option>
+              <option value="pending">未兌換</option>
               <option value="redeemed">已兌換</option>
               <option value="expired">已過期</option>
             </select>
@@ -425,7 +457,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
                               : 'bg-green-100 text-green-700 hover:bg-green-200'
                           }`}
                         >
-                          {award.redeemed ? '取消兌換' : '標記兌換'}
+                          {award.redeemed ? '取消兌換' : '標記已使用'}
                         </button>
                         <button
                           onClick={() => onEdit(award)}
@@ -579,7 +611,7 @@ export default function AwardList({ awards, onEdit, onDelete, onToggleRedeemed, 
                           : 'bg-green-100 text-green-700 hover:bg-green-200'
                       }`}
                     >
-                      {award.redeemed ? '取消兌換' : '標記兌換'}
+                      {award.redeemed ? '取消兌換' : '標記已使用'}
                     </button>
                     <button
                       onClick={() => onEdit(award)}
